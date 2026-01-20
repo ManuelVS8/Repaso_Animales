@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Animales y Plantas - Juego Infantil (6 años)</title>
 <link rel="icon" href="https://raw.githubusercontent.com/ManuelVS8/Audios-juegos-SCIENCE/refs/heads/main/icono.ico" type="image/x-icon">
-<!-- Confetti Library -->
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
 <style>
@@ -188,12 +187,12 @@ transition: width 0.3s ease;
 .play-btn-wrapper {
 position: relative;
 width: 100%;
-height: 0; /* No ocupa espacio en el flujo normal */
+height: 60px; /* Espacio reservado para el botón */
 display: flex;
 justify-content: center;
-z-index: 20; /* Muy por encima de la tarjeta */
-margin-top: -40px; /* Subimos para superponerlo ligeramente o estar justo encima */
-margin-bottom: 0;
+align-items: center;
+z-index: 20; 
+margin-bottom: 10px;
 }
 
 .play-btn-external {
@@ -209,8 +208,6 @@ justify-content: center;
 cursor: pointer;
 box-shadow: 0 4px 8px rgba(0,0,0,0.3);
 transition: transform 0.2s, background-color 0.2s;
-position: absolute;
-top: -28px; /* Centrado verticalmente respecto a su altura de 0 */
 }
 
 .play-btn-external:hover {
@@ -231,7 +228,7 @@ margin-left: 2px; /* Ajuste óptico para el triángulo */
 
 .scene {
 width: 100%; height: 350px; perspective: 1000px;
-margin-bottom: 25px; cursor: pointer;
+margin-bottom: 10px; cursor: pointer;
 position: relative;
 z-index: 10; /* Detrás del botón de play */
 }
@@ -282,17 +279,17 @@ position: absolute; bottom: 20px; font-size: 1.1rem;
 color: var(--orange); font-weight: bold; animation: pulse 2s infinite;
 }
 
-.controls { display: none; width: 100%; justify-content: center; margin-top: 20px; }
+.controls { display: none; width: 100%; justify-content: center; margin-top: 10px; }
 
 .feedback-msg {
 font-size: 1.2rem; color: var(--orange); font-weight: bold;
-height: 30px; margin-top: 10px; opacity: 0; transition: opacity 0.2s;
+height: 30px; margin-top: 5px; opacity: 0; transition: opacity 0.2s;
 }
 
 /* --- BOTONES DE FEEDBACK --- */
 .contenedor-botones {
 display: flex; gap: 20px; width: 100%; max-width: 900px;
-padding: 10px 0; justify-content: center;
+padding: 5px 0; justify-content: center;
 }
 
 .boton-feedback {
@@ -384,7 +381,6 @@ body { background: white; display: block; padding: 0; }
 
 <div class="game-container">
 
-<!-- PANTALLA DE INICIO -->
 <section id="startScreen" class="screen active">
 <header>
 <h1>¡Aprende los Animales!</h1>
@@ -405,7 +401,6 @@ Escucha la pregunta. Si la sabes, pulsa el botón verde. Si no la sabes, pulsa e
 </div>
 </section>
 
-<!-- PANTALLA DE ESTUDIO-JUEGO -->
 <section id="gameScreen" class="screen">
 <div class="progress-container">
 <span id="progress-text" class="progress-text">Progreso</span>
@@ -414,7 +409,6 @@ Escucha la pregunta. Si la sabes, pulsa el botón verde. Si no la sabes, pulsa e
 </div>
 </div>
 
-<!-- BOTÓN DE PLAY EXTERNO (Debajo de barra, sobre tarjeta) -->
 <div class="play-btn-wrapper">
     <button class="play-btn-external" id="mainPlayBtn" onclick="playCardAudio()" aria-label="Escuchar">
         <svg viewBox="0 0 24 24">
@@ -425,14 +419,12 @@ Escucha la pregunta. Si la sabes, pulsa el botón verde. Si no la sabes, pulsa e
 
 <div class="scene">
 <div class="card" id="card">
-<!-- CARA FRONTAL (PREGUNTA) -->
 <div class="card__face card__face--front">
 <span class="card-label">Pregunta</span>
 <div class="card-text" id="question-text"></div>
 <div class="tap-hint">Toca para ver la respuesta</div>
 </div>
 
-<!-- CARA TRASERA (RESPUESTA) -->
 <div class="card__face card__face--back">
 <span class="card-label">Respuesta</span>
 <div class="card-text" id="answer-text"></div>
@@ -466,7 +458,6 @@ Escucha la pregunta. Si la sabes, pulsa el botón verde. Si no la sabes, pulsa e
 </div>
 </section>
 
-<!-- PANTALLA FINAL -->
 <section id="endScreen" class="screen">
 <header>
 <h1>¡Resultados!</h1>
@@ -502,7 +493,6 @@ Escucha la pregunta. Si la sabes, pulsa el botón verde. Si no la sabes, pulsa e
 
 </div>
 
-<!-- Área oculta para impresión PDF -->
 <div id="print-area">
 <h1>Resumen de Estudio: Animales Vertebrados (6 años)</h1>
 <div id="print-content"></div>
@@ -531,7 +521,7 @@ const allQuestions = [
 { 
     id: 1, 
     question: "¿Cual es la diferencia entre animales vertebrados e invertebrados?", 
-    answer: "🦴 Los animales vertebrados tienen esqueleto y nos animales invertebrados no tienen esqueleto.",
+    answer: "🦴 Los animales vertebrados tienen esqueleto y los animales invertebrados no tienen esqueleto.",
     audioQ: "https://raw.githubusercontent.com/ManuelVS8/Audios-juegos-SCIENCE/refs/heads/main/Animales_y_Plantas/Audios%20tarjetas/1P.mp3",
     audioA: "https://raw.githubusercontent.com/ManuelVS8/Audios-juegos-SCIENCE/refs/heads/main/Animales_y_Plantas/Audios%20tarjetas/1R.mp3"
 },
@@ -551,35 +541,35 @@ const allQuestions = [
 },
 { 
     id: 4, 
-    question: "Los mamíferos, ¿son ovíparos vivíparos?", 
+    question: "Los mamíferos, ¿son ovíparos o vivíparos?", 
     answer: "🐶 Los mamíferos son vivíparos",
     audioQ: "https://raw.githubusercontent.com/ManuelVS8/Audios-juegos-SCIENCE/refs/heads/main/Animales_y_Plantas/Audios%20tarjetas/4P.mp3",
     audioA: "https://raw.githubusercontent.com/ManuelVS8/Audios-juegos-SCIENCE/refs/heads/main/Animales_y_Plantas/Audios%20tarjetas/4R.mp3"
 },
 { 
     id: 5, 
-    question: "Las aves, ¿son ovíparas vivíparas?", 
+    question: "Las aves, ¿son ovíparas o vivíparas?", 
     answer: "🦅 Las aves son ovíparas",
     audioQ: "https://raw.githubusercontent.com/ManuelVS8/Audios-juegos-SCIENCE/refs/heads/main/Animales_y_Plantas/Audios%20tarjetas/5P.mp3",
     audioA: "https://raw.githubusercontent.com/ManuelVS8/Audios-juegos-SCIENCE/refs/heads/main/Animales_y_Plantas/Audios%20tarjetas/5R.mp3"
 },
 { 
     id: 6, 
-    question: "Los reptiles, ¿son ovíparos vivíparos?", 
+    question: "Los reptiles, ¿son ovíparos o vivíparos?", 
     answer: "🦎 Los reptiles son ovíparos",
     audioQ: "https://raw.githubusercontent.com/ManuelVS8/Audios-juegos-SCIENCE/refs/heads/main/Animales_y_Plantas/Audios%20tarjetas/6P.mp3",
     audioA: "https://raw.githubusercontent.com/ManuelVS8/Audios-juegos-SCIENCE/refs/heads/main/Animales_y_Plantas/Audios%20tarjetas/6R.mp3"
 },
 { 
     id: 7, 
-    question: "Los peces, ¿son ovíparos vivíparos?", 
+    question: "Los peces, ¿son ovíparos o vivíparos?", 
     answer: "🐟 Los peces son ovíparos",
     audioQ: "https://raw.githubusercontent.com/ManuelVS8/Audios-juegos-SCIENCE/refs/heads/main/Animales_y_Plantas/Audios%20tarjetas/7P.mp3",
     audioA: "https://raw.githubusercontent.com/ManuelVS8/Audios-juegos-SCIENCE/refs/heads/main/Animales_y_Plantas/Audios%20tarjetas/7R.mp3"
 },
 { 
     id: 8, 
-    question: "Los anfibios, ¿son ovíparos vivíparos?", 
+    question: "Los anfibios, ¿son ovíparos o vivíparos?", 
     answer: "🐸 Los anfibios son ovíparos",
     audioQ: "https://raw.githubusercontent.com/ManuelVS8/Audios-juegos-SCIENCE/refs/heads/main/Animales_y_Plantas/Audios%20tarjetas/8P.mp3",
     audioA: "https://raw.githubusercontent.com/ManuelVS8/Audios-juegos-SCIENCE/refs/heads/main/Animales_y_Plantas/Audios%20tarjetas/8R.mp3"
@@ -593,7 +583,7 @@ const allQuestions = [
 },
 { 
     id: 10, 
-    question: "¿Qué tienen el la piel la mayoría de los mamíferos?", 
+    question: "¿Qué tienen en la piel la mayoría de los mamíferos?", 
     answer: "🐯 Pelo",
     audioQ: "https://raw.githubusercontent.com/ManuelVS8/Audios-juegos-SCIENCE/refs/heads/main/Animales_y_Plantas/Audios%20tarjetas/10P.mp3",
     audioA: "https://raw.githubusercontent.com/ManuelVS8/Audios-juegos-SCIENCE/refs/heads/main/Animales_y_Plantas/Audios%20tarjetas/10R.mp3"
@@ -628,14 +618,14 @@ const allQuestions = [
 },
 { 
     id: 15, 
-    question: "¿Cómose desplazan la mayoría de reptiles?", 
+    question: "¿Con qué se desplazan la mayoría de reptiles?", 
     answer: "🐢 Con patas",
     audioQ: "https://raw.githubusercontent.com/ManuelVS8/Audios-juegos-SCIENCE/refs/heads/main/Animales_y_Plantas/Audios%20tarjetas/15P.mp3",
     audioA: "https://raw.githubusercontent.com/ManuelVS8/Audios-juegos-SCIENCE/refs/heads/main/Animales_y_Plantas/Audios%20tarjetas/15R.mp3"
 },
 { 
     id: 16, 
-    question: "¿Cómo se desplazan los los peces?", 
+    question: "¿Con qué se desplazan los peces?", 
     answer: "🐠 Con aletas",
     audioQ: "https://raw.githubusercontent.com/ManuelVS8/Audios-juegos-SCIENCE/refs/heads/main/Animales_y_Plantas/Audios%20tarjetas/16P.mp3",
     audioA: "https://raw.githubusercontent.com/ManuelVS8/Audios-juegos-SCIENCE/refs/heads/main/Animales_y_Plantas/Audios%20tarjetas/16R.mp3"
