@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Animales y Plantas - Juego Infantil (6 años)</title>
+<link rel="icon" href="https://raw.githubusercontent.com/ManuelVS8/Audios-juegos-SCIENCE/refs/heads/main/icono.ico" type="image/x-icon">
+<!-- Confetti Library -->
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+<style>
+:root {
+/* Paleta Cromática */
+--blue-dark: #0f2b4a;
+--blue-700: #1a4b8c;
+--blue-bg-grad-1: #0d2340;
+--blue-bg-grad-2: #1a3a5f;
+--panel: #f0f4f8;
+--orange: #f59e42; /* Color naranja de la paleta */
+--text-main: #000000;
+--white: #FFFFFF;
+--shadow: 0 4px 15px rgba(0,0,0,0.2);
+--radius: 16px;
+}
+
+* {
+box-sizing: border-box;
+margin: 0;
+padding: 0;
+font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+-webkit-tap-highlight-color: transparent;
+}
+
+body {
+background: linear-gradient(135deg, var(--blue-bg-grad-1), var(--blue-bg-grad-2));
+display: block; 
+padding: 20px;
+overflow-x: hidden;
+color: var(--text-main);
+}
+
+/* --- CONTENEDOR PRINCIPAL (.game-container) --- */
+.game-container {
+background-color: var(--white);
+width: 100%;
+max-width: 980px;
+height: auto;
+min-height: 640px;
+border-radius: var(--radius);
+box-shadow: var(--shadow);
+position: relative;
+overflow: visible; /* Cambiado a visible para permitir que el botón sobresalga si fuera necesario, aunque aquí usaremos z-index */
+display: flex;
+flex-direction: column;
+padding: 40px 30px;
+text-align: center;
+margin: 0 auto 20px auto;
+}
+
+/* --- HEADER --- */
+header { margin-bottom: 20px; }
+
+h1 {
+color: var(--blue-dark);
+font-weight: 900;
+font-size: clamp(2rem, 5vw, 3.1rem);
+letter-spacing: .5px;
+margin-bottom: 10px;
+line-height: 1.1;
+}
+
+.subtitle {
+color: var(--blue-700);
+font-size: clamp(1rem, 2vw, 1.25rem);
+font-weight: 500;
+}
+
+/* --- Screens --- */
+.screen {
+display: none;
+flex-direction: column;
+flex: 1;
+justify-content: space-between;
+align-items: center;
+width: 100%;
+height: 100%;
+position: relative; /* Necesario para posicionar el botón de play absoluto dentro del screen */
+}
+
+.screen.active { display: flex; }
+
+/* --- CONTENIDO INICIO --- */
+.start-content {
+display: flex;
+flex-direction: column;
+align-items: center;
+justify-content: center;
+gap: 1.5rem;
+width: 100%;
+flex: 1;
+}
+
+.advice-box {
+background-color: var(--panel);
+border-left: 4px solid var(--blue-700);
+border-radius: 12px;
+max-width: 760px;
+width: 100%;
+padding: 25px;
+text-align: center;
+color: var(--blue-700);
+font-size: clamp(1rem, 1.5vw, 1.15rem);
+line-height: 1.6;
+box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.highlight-keyword { color: var(--orange); font-weight: bold; }
+
+.motivational-msg {
+display: block;
+margin-top: 10px;
+font-weight: 800;
+font-size: 1.2rem;
+}
+
+/* --- BOTÓN PRINCIPAL (NARANJA) --- */
+.btn-primary {
+background-color: var(--orange);
+color: var(--white);
+border: none;
+height: 48px;
+min-width: 140px;
+font-weight: 800;
+font-size: 1.2rem;
+border-radius: 10px;
+cursor: pointer;
+transition: transform 0.2s, box-shadow 0.2s, background-color 0.2s;
+box-shadow: 0 4px 6px rgba(0,0,0,0.15);
+display: inline-flex;
+align-items: center;
+justify-content: center;
+text-transform: uppercase;
+letter-spacing: 0.5px;
+}
+
+.btn-primary:hover {
+background-color: #e68e35;
+transform: translateY(-3px);
+box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+}
+
+.btn-primary:active { transform: translateY(1px); }
+
+/* --- IMAGEN DECORATIVA --- */
+.start-image {
+max-width: 300px;
+width: 100%;
+height: auto;
+object-fit: contain;
+margin-top: auto;
+}
+
+/* --- GAME STYLES --- */
+.progress-container { 
+    width: 100%; 
+    margin-bottom: 20px; 
+    z-index: 5; /* Para asegurar que esté sobre el contenido si hay solapamientos */
+}
+
+.progress-text {
+font-size: 1rem; color: var(--blue-700); margin-bottom: 5px;
+display: block; text-align: left; font-weight: 600;
+}
+
+.progress-bar-bg {
+width: 100%; height: 10px; background-color: #eee;
+border-radius: 5px; overflow: hidden;
+}
+
+.progress-bar-fill {
+height: 100%; 
+background-color: var(--orange); /* Cambio a NARANJA */
+width: 0%;
+transition: width 0.3s ease;
+}
+
+/* --- BOTÓN DE PLAY EXTERNO --- */
+.play-btn-wrapper {
+position: relative;
+width: 100%;
+height: 0; /* No ocupa espacio en el flujo normal */
+display: flex;
+justify-content: center;
+z-index: 20; /* Muy por encima de la tarjeta */
+margin-top: -40px; /* Subimos para superponerlo ligeramente o estar justo encima */
+margin-bottom: 0;
+}
+
+.play-btn-external {
+background-color: var(--blue-700);
+color: white;
+border: 4px solid var(--white); /* Borde blanco para separarlo del fondo */
+border-radius: 50%;
+width: 56px;
+height: 56px;
+display: flex;
+align-items: center;
+justify-content: center;
+cursor: pointer;
+box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+transition: transform 0.2s, background-color 0.2s;
+position: absolute;
+top: -28px; /* Centrado verticalmente respecto a su altura de 0 */
+}
+
+.play-btn-external:hover {
+background-color: var(--blue-dark);
+transform: scale(1.1);
+}
+
+.play-btn-external:active {
+transform: scale(0.95);
+}
+
+.play-btn-external svg {
+width: 24px;
+height: 24px;
+fill: white;
+margin-left: 2px; /* Ajuste óptico para el triángulo */
+}
+
+.scene {
+width: 100%; height: 350px; perspective: 1000px;
+margin-bottom: 25px; cursor: pointer;
+position: relative;
+z-index: 10; /* Detrás del botón de play */
+}
+
+@media (min-width: 768px) { .scene { height: 500px; } }
+
+.card {
+width: 100%; height: 100%; position: relative;
+transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
+transform-style: preserve-3d; border-radius: 12px; box-shadow: var(--shadow);
+}
+
+.card.is-flipped { transform: rotateY(180deg); }
+
+.card__face {
+position: absolute; width: 100%; height: 100%;
+backface-visibility: hidden; background-color: var(--white);
+border-radius: 12px; display: flex;
+flex-direction: column;
+align-items: center; justify-content: center; padding: 30px; border: 1px solid #eee;
+}
+
+.card__face--front {
+z-index: 2; transform: rotateY(0deg); background-color: #FFFFFF;
+}
+
+.card__face--back {
+transform: rotateY(180deg); background-color: #EBF0FF; padding-top: 70px;
+}
+
+.card-label {
+position: absolute; top: 25px; font-size: 1rem; text-transform: uppercase;
+color: var(--blue-700); font-weight: 600; letter-spacing: 1px;
+width: 100%; text-align: center;
+}
+
+.card-text {
+color: var(--text-main); line-height: 1.3; text-align: center;
+width: 100%; font-size: 1.6rem; font-weight: 600;
+padding-top: 20px;
+}
+
+@media (min-width: 768px) { .card-text { font-size: 2.2rem; } }
+@media (min-width: 1200px) { .card-text { font-size: 2.8rem; } }
+
+.tap-hint {
+position: absolute; bottom: 20px; font-size: 1.1rem;
+color: var(--orange); font-weight: bold; animation: pulse 2s infinite;
+}
+
+.controls { display: none; width: 100%; justify-content: center; margin-top: 20px; }
+
+.feedback-msg {
+font-size: 1.2rem; color: var(--orange); font-weight: bold;
+height: 30px; margin-top: 10px; opacity: 0; transition: opacity 0.2s;
+}
+
+/* --- BOTONES DE FEEDBACK --- */
+.contenedor-botones {
+display: flex; gap: 20px; width: 100%; max-width: 900px;
+padding: 10px 0; justify-content: center;
+}
+
+.boton-feedback {
+flex: 1; min-width: 160px; background-color: white; border: none;
+border-bottom: 8px solid; border-radius: 2rem; padding: 24px 10px;
+cursor: pointer; display: flex;
+flex-direction: column;
+align-items: center; gap: 12px; transition: all 0.2s ease;
+outline: none; user-select: none;
+}
+
+.icono-circulo {
+padding: 12px; border-radius: 1rem; display: flex;
+justify-content: center; align-items: center; transition: all 0.3s ease;
+}
+
+.icono-circulo svg { width: 32px; height: 32px; }
+
+.boton-error { border-color: #fee2e2; color: #ef4444; }
+.boton-error .icono-circulo { background-color: #fef2f2; }
+.boton-error:hover { border-color: #ef4444; }
+.boton-error:hover .icono-circulo { background-color: #ef4444; color: white; transform: rotate(12deg); }
+
+.boton-acierto { border-color: #dcfce7; color: #16a34a; }
+.boton-acierto .icono-circulo { background-color: #f0fdf4; }
+.boton-acierto:hover { border-color: #16a34a; }
+.boton-acierto:hover .icono-circulo { background-color: #16a34a; color: white; transform: rotate(-12deg); }
+
+.boton-feedback:active { transform: translateY(4px); border-bottom-width: 4px; }
+.texto-boton { font-size: 1rem; font-weight: 900; text-transform: uppercase; letter-spacing: -0.025em; }
+
+/* --- END SCREEN & TROPHY ANIMATION --- */
+.score-big {
+font-size: 6rem; font-weight: 800; color: var(--blue-dark); margin: 10px 0;
+}
+
+.trophy-container {
+font-size: 6rem; margin: 10px 0; display: none;
+transform-origin: center bottom;
+}
+
+.trophy-animate {
+animation: trophy-pop 1.2s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+}
+
+@keyframes trophy-pop {
+0% { transform: scale(0) rotate(-20deg); opacity: 0; }
+50% { transform: scale(1.3) rotate(10deg); opacity: 1; }
+70% { transform: scale(0.9) rotate(-5deg); }
+100% { transform: scale(1) rotate(0deg); }
+}
+
+.end-img { max-width: 150px; margin-top: 20px; object-fit: contain; }
+
+/* Botón secundario (Azul oscuro por defecto) */
+.btn-secondary {
+background-color: var(--blue-dark); color: white; border: none;
+padding: 12px 30px; font-size: 1.1rem; border-radius: 50px; cursor: pointer;
+font-weight: bold; transition: transform 0.2s, background-color 0.2s;
+box-shadow: 0 4px 6px rgba(0,0,0,0.1); display: inline-flex; align-items: center;
+justify-content: center; gap: 8px; text-decoration: none; margin: 5px;
+}
+
+.btn-secondary:hover { background-color: #163a5e; transform: translateY(-2px); }
+
+/* --- Animations --- */
+@keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+@keyframes pop { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
+@keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+
+.anim-pop { animation: pop 0.3s ease-out; }
+.anim-shake { animation: shake 0.4s ease-in-out; }
+
+/* Print Styles */
+@media print {
+body { background: white; display: block; padding: 0; }
+.game-container { box-shadow: none; border: none; max-width: 100%; min-height: auto; }
+.btn, .btn-primary, .btn-secondary, .progress-container, .scene, .start-image, .end-image, .contenedor-botones, .play-btn-wrapper, .play-btn-external { display: none !important; }
+.screen { display: none !important; }
+#print-area { display: block !important; margin-top: 20px; text-align: left; }
+#print-area h1 { color: black; }
+.print-item { margin-bottom: 10px; border-bottom: 1px solid #ccc; padding: 10px 0; }
+.print-q { font-weight: bold; }
+.print-a { margin-left: 20px; color: #555; }
+}
+#print-area { display: none; }
+</style></head>
+<body>
+
+<div class="game-container">
+
+<!-- PANTALLA DE INICIO -->
+<section id="startScreen" class="screen active">
+<header>
+<h1>¡Aprende los Animales!</h1>
+<p class="subtitle">Escucha, aprende y juega.</p>
+</header>
+
+<div class="start-content">
+<div class="advice-box">
+¿Estás listo para convertirte en un experto en animales vertebrados? 🐾
+<br><br>
+Escucha la pregunta. Si la sabes, pulsa el botón verde. Si no la sabes, pulsa el rojo.
+<span class="motivational-msg">¡Tú puedes!</span>
+</div>
+
+<button class="btn btn-primary" onclick="playSound('tap'); startGame()">Jugar</button>
+
+<img src="https://raw.githubusercontent.com/ManuelVS8/Efectos_audio/refs/heads/main/Ni%C3%B1os.png" alt="Niños estudiando" class="start-image">
+</div>
+</section>
+
+<!-- PANTALLA DE ESTUDIO-JUEGO -->
+<section id="gameScreen" class="screen">
+<div class="progress-container">
+<span id="progress-text" class="progress-text">Progreso</span>
+<div class="progress-bar-bg">
+<div id="progress-fill" class="progress-bar-fill"></div>
+</div>
+</div>
+
+<!-- BOTÓN DE PLAY EXTERNO (Debajo de barra, sobre tarjeta) -->
+<div class="play-btn-wrapper">
+    <button class="play-btn-external" id="mainPlayBtn" onclick="playCardAudio()" aria-label="Escuchar">
+        <svg viewBox="0 0 24 24">
+            <path d="M8 5v14l11-7z"/>
+        </svg>
+    </button>
+</div>
+
+<div class="scene">
+<div class="card" id="card">
+<!-- CARA FRONTAL (PREGUNTA) -->
+<div class="card__face card__face--front">
+<span class="card-label">Pregunta</span>
+<div class="card-text" id="question-text"></div>
+<div class="tap-hint">Toca para ver la respuesta</div>
+</div>
+
+<!-- CARA TRASERA (RESPUESTA) -->
+<div class="card__face card__face--back">
+<span class="card-label">Respuesta</span>
+<div class="card-text" id="answer-text"></div>
+</div>
+</div>
+</div>
+
+<div class="feedback-msg" id="feedback-msg">Guardada para repaso</div>
+
+<div class="controls" id="controls">
+<div class="contenedor-botones">
+<button class="boton-feedback boton-error" onclick="handleAnswer(false)" id="btn-no">
+<div class="icono-circulo">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+<line x1="18" y1="6" x2="6" y2="18"></line>
+<line x1="6" y1="6" x2="18" y2="18"></line>
+</svg>
+</div>
+<span class="texto-boton">No la sabía</span>
+</button>
+
+<button class="boton-feedback boton-acierto" onclick="handleAnswer(true)" id="btn-yes">
+<div class="icono-circulo">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+<polyline points="20 6 9 17 4 12"></polyline>
+</svg>
+</div>
+<span class="texto-boton">La sabía</span>
+</button>
+</div>
+</div>
+</section>
+
+<!-- PANTALLA FINAL -->
+<section id="endScreen" class="screen">
+<header>
+<h1>¡Resultados!</h1>
+<p class="subtitle">¡Muy bien hecho!</p>
+</header>
+
+<div>
+<p>Puntuación:</p>
+<div class="score-big" id="final-score">0</div>
+
+<div class="trophy-container" id="trophy">🏆</div>
+<p id="end-message" style="font-size: 1.5rem; color: var(--blue-700);">¡Buen trabajo! Sigue practicando</p>
+<p id="time-spent" style="color: #888; font-size: 0.9rem;">Tiempo: 00:00</p>
+
+<div style="margin-top: 30px; display: flex; flex-direction: column; align-items: center; gap: 15px;">
+<button id="btn-review" class="btn btn-primary" onclick="startReviewMode()" style="display: none;">
+🔄 Repasar falladas
+</button>
+<button id="btn-restart" class="btn btn-primary" onclick="playSound('tap'); goToStartScreen()">
+↻ Empezar de nuevo
+</button>
+<button class="btn btn-secondary" style="background-color: #555;" onclick="printPDF()">
+📄 Descargar Resumen PDF
+</button>
+</div>
+</div>
+
+<div>
+<p style="margin-top: 30px; font-size: 0.9rem; color: #999;">Creado por Manuel J. Ventura</p>
+<img src="https://raw.githubusercontent.com/ManuelVS8/Efectos_audio/refs/heads/main/Siurot.png" alt="Logo Colegio" class="end-img" style="max-width: 120px;">
+</div>
+</section>
+
+</div>
+
+<!-- Área oculta para impresión PDF -->
+<div id="print-area">
+<h1>Resumen de Estudio: Animales Vertebrados (6 años)</h1>
+<div id="print-content"></div>
+</div>
+
+<script>
+// --- AUDIOS EFECTOS ---
+const audioUrls = {
+correcto: "https://raw.githubusercontent.com/ManuelVS8/Efectos_audio/refs/heads/main/Correcto.mp3",
+error: "https://raw.githubusercontent.com/ManuelVS8/Efectos_audio/refs/heads/main/Error.mp3",
+victoria: "https://raw.githubusercontent.com/ManuelVS8/Efectos_audio/refs/heads/main/Termin%C3%A9.mp3",
+completado: "https://raw.githubusercontent.com/ManuelVS8/Efectos_audio/refs/heads/main/Completado.mp3",
+tap: "https://raw.githubusercontent.com/ManuelVS8/Efectos_audio/refs/heads/main/Tap.mp3"
+};
+
+let currentAudioObject = null; // Variable para controlar el audio actual de la tarjeta
+
+function playSound(name) {
+const audio = new Audio(audioUrls[name]);
+audio.volume = 0.5;
+audio.play().catch(e => console.log("Audio autoplay blocked or error:", e));
+}
+
+// --- DATASET (20 Preguntas con audios actualizados) ---
+const allQuestions = [
+{ 
+    id: 1, 
+    question: "¿Cual es la diferencia entre animales vertebrados e invertebrados?", 
+    answer: "🦴 Los animales vertebrados tienen esqueleto y nos animales invertebrados no tienen esqueleto.",
+    audioQ: "https://raw.githubusercontent.com/ManuelVS8/Audios-juegos-SCIENCE/refs/heads/main/Animales_y_Plantas/Audios%20tarjetas/1P.mp3",
+    audioA: "https://raw.githubusercontent.com/ManuelVS8/Audios-juegos-SCIENCE/refs/heads/main/Animales_y_Plantas/Audios%20tarjetas/1R.mp3"
+},
+{ 
+    id: 2, 
+    question: "¿Cuáles son los cinco grupos de animales vertebrados?", 
+    answer: "🐾 Los grupos de vertebrados son: mamíferos, aves, reptiles, peces y anfibios.",
+    audioQ: "https://raw.githubusercontent.com/ManuelVS8/Audios-juegos-SCIENCE/refs/heads/main/Animales_y_Plantas/Audios%20tarjetas/2P.mp3",
+    audioA: "https://raw.githubusercontent.com/ManuelVS8/Audios-juegos-SCIENCE/refs/heads/main/Animales_y_Plantas/Audios%20tarjetas/2R.mp3"
+},
+{ 
+    id: 3, 
+    question: "¿Qué diferencia hay entre animales ovíparos y vivíparos?", 
+    answer: "🥚 Los animales ovíparos nacen de un huevo y los animales vivíparos nacen del vientre de la madre.",
+    audioQ: "https://raw.githubusercontent.com/ManuelVS8/Audios-juegos-SCIENCE/refs/heads/main/Animales_y_Plantas/Audios%20tarjetas/3P.mp3",
+    audioA: "https://raw.githubusercontent.com/ManuelVS8/Audios-juegos-SCIENCE/refs/heads/main/Animales_y_Plantas/Audios%20tarjetas/3R.mp3"
+},
+{ 
+    id: 4, 
+    question: "Los mamíferos, ¿son ovíparos vivíparos?", 
+    answer: "🐶 Los mamíferos son vivíparos",
+    audioQ: "https://raw.githubusercontent.com/ManuelVS8/Audios-juegos-SCIENCE/refs/heads/main/Animales_y_Plantas/Audios%20tarjetas/4P.mp3",
+    audioA: "https://raw.githubusercontent.com/ManuelVS8/Audios-juegos-SCIENCE/refs/heads/main/Animales_y_Plantas/Audios%20tarjetas/4R.mp3"
+},
+{ 
+    id: 5, 
+    question: "Las aves, ¿son ovíparas vivíparas?", 
+    answer: "🦅 Las aves son ovíparas",
+    audioQ: "https://raw.githubusercontent.com/ManuelVS8/Audios-juegos-SCIENCE/refs/heads/main/Animales_y_Plantas/Audios%20tarjetas/5P.mp3",
+    audioA: "https://raw.githubusercontent.com/ManuelVS8/Audios-juegos-SCIENCE/refs/heads/main/Animales_y_Plantas/Audios%20tarjetas/5R.mp3"
+},
+{ 
+    id: 6, 
+    question: "Los reptiles, ¿son ovíparos vivíparos?", 
+    answer: "🦎 Los reptiles son ovíparos",
+    audioQ: "https://raw.githubusercontent.com/ManuelVS8/Audios-juegos-SCIENCE/refs/heads/main/Animales_y_Plantas/Audios%20tarjetas/6P.mp3",
+    audioA: "https://raw.githubusercontent.com/ManuelVS8/Audios-juegos-SCIENCE/refs/heads/main/Animales_y_Plantas/Audios%20tarjetas/6R.mp3"
+},
+{ 
+    id: 7, 
+    question: "Los peces, ¿son ovíparos vivíparos?", 
+    answer: "🐟 Los peces son ovíparos",
+    audioQ: "https://raw.githubusercontent.com/ManuelVS8/Audios-juegos-SCIENCE/refs/heads/main/Animales_y_Plantas/Audios%20tarjetas/7P.mp3",
+    audioA: "https://raw.githubusercontent.com/ManuelVS8/Audios-juegos-SCIENCE/refs/heads/main/Animales_y_Plantas/Audios%20tarjetas/7R.mp3"
+},
+{ 
+    id: 8, 
+    question: "Los anfibios, ¿son ovíparos vivíparos?", 
+    answer: "🐸 Los anfibios son ovíparos",
+    audioQ: "https://raw.githubusercontent.com/ManuelVS8/Audios-juegos-SCIENCE/refs/heads/main/Animales_y_Plantas/Audios%20tarjetas/8P.mp3",
+    audioA: "https://raw.githubusercontent.com/ManuelVS8/Audios-juegos-SCIENCE/refs/heads/main/Animales_y_Plantas/Audios%20tarjetas/8R.mp3"
+},
+{ 
+    id: 9, 
+    question: "¿Qué grupo de vertebrados beben leche de su mamá al nacer?", 
+    answer: "🍼 Los mamíferos.",
+    audioQ: "https://raw.githubusercontent.com/ManuelVS8/Audios-juegos-SCIENCE/refs/heads/main/Animales_y_Plantas/Audios%20tarjetas/9P.mp3",
+    audioA: "https://raw.githubusercontent.com/ManuelVS8/Audios-juegos-SCIENCE/refs/heads/main/Animales_y_Plantas/Audios%20tarjetas/9R.mp3"
+},
+{ 
+    id: 10, 
+    question: "¿Qué tienen el la piel la mayoría de los mamíferos?", 
+    answer: "🐯 Pelo",
+    audioQ: "https://raw.githubusercontent.com/ManuelVS8/Audios-juegos-SCIENCE/refs/heads/main/Animales_y_Plantas/Audios%20tarjetas/10P.mp3",
+    audioA: "https://raw.githubusercontent.com/ManuelVS8/Audios-juegos-SCIENCE/refs/heads/main/Animales_y_Plantas/Audios%20tarjetas/10R.mp3"
+},
+{ 
+    id: 11, 
+    question: "¿Cómo cubren su piel las aves?", 
+    answer: "🦅 Las aves cubren su piel con plumas",
+    audioQ: "https://raw.githubusercontent.com/ManuelVS8/Audios-juegos-SCIENCE/refs/heads/main/Animales_y_Plantas/Audios%20tarjetas/11P.mp3",
+    audioA: "https://raw.githubusercontent.com/ManuelVS8/Audios-juegos-SCIENCE/refs/heads/main/Animales_y_Plantas/Audios%20tarjetas/11R.mp3"
+},
+{ 
+    id: 12, 
+    question: "¿Qué dos grupos de vertebrados cubren su piel con escamas?", 
+    answer: "🐊 Los reptiles y los peces",
+    audioQ: "https://raw.githubusercontent.com/ManuelVS8/Audios-juegos-SCIENCE/refs/heads/main/Animales_y_Plantas/Audios%20tarjetas/12P.mp3",
+    audioA: "https://raw.githubusercontent.com/ManuelVS8/Audios-juegos-SCIENCE/refs/heads/main/Animales_y_Plantas/Audios%20tarjetas/12R.mp3"
+},
+{ 
+    id: 13, 
+    question: "¿Qué grupo de vertebrados tiene su piel desnuda?", 
+    answer: "🐸 Los anfibios",
+    audioQ: "https://raw.githubusercontent.com/ManuelVS8/Audios-juegos-SCIENCE/refs/heads/main/Animales_y_Plantas/Audios%20tarjetas/13P.mp3",
+    audioA: "https://raw.githubusercontent.com/ManuelVS8/Audios-juegos-SCIENCE/refs/heads/main/Animales_y_Plantas/Audios%20tarjetas/13R.mp3"
+},
+{ 
+    id: 14, 
+    question: "¿Cuáles son las extremidades de las aves?", 
+    answer: "🐦 Las aves tienen dos alas y dos patas",
+    audioQ: "https://raw.githubusercontent.com/ManuelVS8/Audios-juegos-SCIENCE/refs/heads/main/Animales_y_Plantas/Audios%20tarjetas/14P.mp3",
+    audioA: "https://raw.githubusercontent.com/ManuelVS8/Audios-juegos-SCIENCE/refs/heads/main/Animales_y_Plantas/Audios%20tarjetas/14R.mp3"
+},
+{ 
+    id: 15, 
+    question: "¿Cómose desplazan la mayoría de reptiles?", 
+    answer: "🐢 Con patas",
+    audioQ: "https://raw.githubusercontent.com/ManuelVS8/Audios-juegos-SCIENCE/refs/heads/main/Animales_y_Plantas/Audios%20tarjetas/15P.mp3",
+    audioA: "https://raw.githubusercontent.com/ManuelVS8/Audios-juegos-SCIENCE/refs/heads/main/Animales_y_Plantas/Audios%20tarjetas/15R.mp3"
+},
+{ 
+    id: 16, 
+    question: "¿Cómo se desplazan los los peces?", 
+    answer: "🐠 Con aletas",
+    audioQ: "https://raw.githubusercontent.com/ManuelVS8/Audios-juegos-SCIENCE/refs/heads/main/Animales_y_Plantas/Audios%20tarjetas/16P.mp3",
+    audioA: "https://raw.githubusercontent.com/ManuelVS8/Audios-juegos-SCIENCE/refs/heads/main/Animales_y_Plantas/Audios%20tarjetas/16R.mp3"
+},
+{ 
+    id: 17, 
+    question: "¿Cómo se desplazan los anfibios adultos?", 
+    answer: "🐸 Con patas",
+    audioQ: "https://raw.githubusercontent.com/ManuelVS8/Audios-juegos-SCIENCE/refs/heads/main/Animales_y_Plantas/Audios%20tarjetas/17P.mp3",
+    audioA: "https://raw.githubusercontent.com/ManuelVS8/Audios-juegos-SCIENCE/refs/heads/main/Animales_y_Plantas/Audios%20tarjetas/17R.mp3"
+},
+{ 
+    id: 18, 
+    question: "¿Cómo se llama el cambio que experimentan los anfibios y otros animales para llegar a su forma adulta?", 
+    answer: "🦋 Se llama metamorfosis.",
+    audioQ: "https://raw.githubusercontent.com/ManuelVS8/Audios-juegos-SCIENCE/refs/heads/main/Animales_y_Plantas/Audios%20tarjetas/18P.mp3",
+    audioA: "https://raw.githubusercontent.com/ManuelVS8/Audios-juegos-SCIENCE/refs/heads/main/Animales_y_Plantas/Audios%20tarjetas/18R.mp3"
+},
+{ 
+    id: 19, 
+    question: "¿Qué grupo de vertebrados pasan toda su vida bajo el agua?", 
+    answer: "🌊 Los peces",
+    audioQ: "https://raw.githubusercontent.com/ManuelVS8/Audios-juegos-SCIENCE/refs/heads/main/Animales_y_Plantas/Audios%20tarjetas/19P.mp3",
+    audioA: "https://raw.githubusercontent.com/ManuelVS8/Audios-juegos-SCIENCE/refs/heads/main/Animales_y_Plantas/Audios%20tarjetas/19R.mp3"
+},
+{ 
+    id: 20, 
+    question: "¿Qué grupo de vertebrados tienen pico?", 
+    answer: "🦜 Las aves.",
+    audioQ: "https://raw.githubusercontent.com/ManuelVS8/Audios-juegos-SCIENCE/refs/heads/main/Animales_y_Plantas/Audios%20tarjetas/20P.mp3",
+    audioA: "https://raw.githubusercontent.com/ManuelVS8/Audios-juegos-SCIENCE/refs/heads/main/Animales_y_Plantas/Audios%20tarjetas/20R.mp3"
+}
+];
+
+// --- ESTADO DEL JUEGO ---
+let currentQueue = [];
+let currentIndex = 0;
+let masteredQuestions = new Set();
+let startTime = 0;
+let isCardFlipped = false;
+let isProcessing = false;
+
+const totalQuestions = allQuestions.length;
+
+// --- DOM ELEMENTS ---
+const screens = {
+start: document.getElementById('startScreen'),
+game: document.getElementById('gameScreen'),
+end: document.getElementById('endScreen')
+};
+const card = document.getElementById('card');
+const qText = document.getElementById('question-text');
+const aText = document.getElementById('answer-text');
+const controls = document.getElementById('controls');
+const feedbackMsg = document.getElementById('feedback-msg');
+const progressBar = document.getElementById('progress-fill');
+const progressText = document.getElementById('progress-text');
+const btnYes = document.getElementById('btn-yes');
+const btnNo = document.getElementById('btn-no');
+
+// --- FUNCIONES DE AUDIO ---
+
+// Función para detener el audio actual si existe
+function stopCurrentAudio() {
+if (currentAudioObject) {
+currentAudioObject.pause();
+currentAudioObject.currentTime = 0;
+currentAudioObject = null;
+}
+}
+
+// Función central para reproducir audio basada en el estado del flip
+function playCardAudio() {
+const currentQ = currentQueue[currentIndex];
+if (!currentQ) return;
+
+let url = '';
+if (isCardFlipped) {
+url = currentQ.audioA;
+} else {
+url = currentQ.audioQ;
+}
+
+if (url) {
+stopCurrentAudio();
+currentAudioObject = new Audio(url);
+currentAudioObject.volume = 0.8;
+currentAudioObject.play().catch(e => console.log("Error reproduciendo audio:", e));
+}
+}
+
+// --- FUNCIONES PRINCIPALES ---
+
+function startGame() {
+masteredQuestions.clear();
+startTime = Date.now();
+startRound(allQuestions);
+}
+
+function goToStartScreen() {
+stopCurrentAudio();
+masteredQuestions.clear();
+switchScreen('start');
+}
+
+function startRound(questions) {
+currentQueue = shuffle([...questions]);
+currentIndex = 0;
+isCardFlipped = false;
+isProcessing = false;
+
+switchScreen('game');
+updateProgress();
+renderCard();
+}
+
+function startReviewMode() {
+const missedQuestions = allQuestions.filter(q => !masteredQuestions.has(q.id));
+if (missedQuestions.length === 0) {
+return;
+}
+startRound(missedQuestions);
+}
+
+function switchScreen(name) {
+Object.values(screens).forEach(s => s.classList.remove('active'));
+screens[name].classList.add('active');
+}
+
+function shuffle(array) {
+for (let i = array.length - 1; i > 0; i--) {
+const j = Math.floor(Math.random() * (i + 1));
+[array[i], array[j]] = [array[j], array[i]];
+}
+return array;
+}
+
+function renderCard() {
+card.classList.remove('is-flipped');
+controls.style.display = 'none';
+feedbackMsg.style.opacity = '0';
+isCardFlipped = false;
+
+btnYes.classList.remove('anim-pop', 'anim-shake');
+btnNo.classList.remove('anim-pop', 'anim-shake');
+
+setTimeout(() => {
+const q = currentQueue[currentIndex];
+qText.textContent = q.question;
+aText.textContent = q.answer;
+// Reproducir audio de la pregunta automáticamente
+playCardAudio();
+}, 200);
+}
+
+// --- INTERACCIONES ---
+
+card.addEventListener('click', () => {
+if (isProcessing || isCardFlipped) return;
+
+playSound('tap');
+card.classList.add('is-flipped');
+isCardFlipped = true;
+
+setTimeout(() => {
+controls.style.display = 'flex';
+// Reproducir audio de la respuesta automáticamente al girar
+playCardAudio();
+}, 300);
+});
+
+function handleAnswer(isCorrect) {
+if (isProcessing) return;
+isProcessing = true;
+
+const currentQ = currentQueue[currentIndex];
+const btn = isCorrect ? btnYes : btnNo;
+
+// Detener el audio de la tarjeta para reproducir el feedback
+stopCurrentAudio();
+
+if (isCorrect) {
+btn.classList.add('anim-pop');
+playSound('correcto');
+masteredQuestions.add(currentQ.id);
+
+setTimeout(() => {
+nextCard();
+btn.classList.remove('anim-pop');
+}, 300);
+
+} else {
+btn.classList.add('anim-shake');
+playSound('error');
+feedbackMsg.style.opacity = '1';
+masteredQuestions.delete(currentQ.id);
+
+setTimeout(() => {
+nextCard();
+btn.classList.remove('anim-shake');
+feedbackMsg.style.opacity = '0';
+}, 500);
+}
+}
+
+function nextCard() {
+currentIndex++;
+updateProgress();
+
+if (currentIndex < currentQueue.length) {
+renderCard();
+isProcessing = false;
+} else {
+endGame();
+}
+}
+
+function updateProgress() {
+progressText.textContent = `Pregunta ${currentIndex + 1} de ${currentQueue.length}`;
+const pct = (currentIndex / currentQueue.length) * 100;
+progressBar.style.width = `${pct}%`;
+}
+
+// --- FINAL DE JUEGO ---
+
+function endGame() {
+stopCurrentAudio(); // Asegurar que no haya audio sonando al terminar
+
+const pointsPerQ = 100 / totalQuestions;
+const score = Math.round(masteredQuestions.size * pointsPerQ);
+
+document.getElementById('final-score').textContent = score;
+
+const timeElapsed = Date.now() - startTime;
+const minutes = Math.floor(timeElapsed / 60000);
+const seconds = Math.floor((timeElapsed % 60000) / 1000);
+document.getElementById('time-spent').textContent = `Tiempo: ${minutes < 10 ? '0'+minutes : minutes}:${seconds < 10 ? '0'+seconds : seconds}`;
+
+const btnReview = document.getElementById('btn-review');
+const trophy = document.getElementById('trophy');
+const msg = document.getElementById('end-message');
+
+if (score === 100) {
+playSound('victoria');
+msg.textContent = "¡Enhorabuena, puntuación máxima!";
+
+trophy.style.display = 'block';
+trophy.classList.remove('trophy-animate');
+void trophy.offsetWidth;
+trophy.classList.add('trophy-animate');
+
+btnReview.style.display = 'none';
+launchConfetti();
+} else {
+playSound('completado');
+msg.textContent = "¡Buen trabajo! Sigue practicando";
+trophy.style.display = 'none';
+
+const missedCount = totalQuestions - masteredQuestions.size;
+if (missedCount > 0) {
+btnReview.style.display = 'inline-flex';
+btnReview.textContent = `🔄 Repasar ${missedCount} falladas`;
+} else {
+btnReview.style.display = 'none';
+}
+}
+
+switchScreen('end');
+}
+
+function launchConfetti() {
+var duration = 3 * 1000;
+var animationEnd = Date.now() + duration;
+var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
+
+function randomInRange(min, max) {
+return Math.random() * (max - min) + min;
+}
+
+var interval = setInterval(function() {
+var timeLeft = animationEnd - Date.now();
+
+if (timeLeft <= 0) {
+return clearInterval(interval);
+}
+
+var particleCount = 50 * (timeLeft / duration);
+confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }));
+confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
+}, 250);
+}
+
+// --- IMPRESIÓN PDF ---
+function printPDF() {
+const printContent = document.getElementById('print-content');
+printContent.innerHTML = '';
+
+const sortedQuestions = [...allQuestions].sort((a,b) => a.id - b.id);
+
+sortedQuestions.forEach(q => {
+const div = document.createElement('div');
+div.className = 'print-item';
+div.innerHTML = `
+<div class="print-q">${q.id}. ${q.question}</div>
+<div class="print-a">${q.answer}</div>
+`;
+printContent.appendChild(div);
+});
+
+window.print();
+}
+
+</script></body>
+</html>
